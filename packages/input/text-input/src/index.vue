@@ -1,7 +1,13 @@
 <script setup>
-import {onMounted, ref} from "vue";
+import {onBeforeMount, onMounted, onUnmounted, ref} from "vue";
+
+const emit = defineEmits(['update:modelValue']);
 
 const props = defineProps({
+  modelValue: {
+    type: String,
+    default: ''
+  },
   width: {
     type: String,
     default: '20rem'
@@ -62,15 +68,28 @@ const props = defineProps({
     type: String,
     default: '5px'
   },
-  enable: {
+  disable: {
     type: Boolean,
-    default: true
+    default: false
+  },
+  disableBackgroundColor: {
+    type: String,
+    default: '#f1f3f5'
+  },
+  autoFocus: {
+    type: Boolean,
+    default: false,
+  },
+  regex: {
+    type: String,
+    default: ''
   },
   consoleDebug: {
     type: Boolean,
     default: false
   }
 })
+
 const textAlign = ref(
     props.textDirection !== 'center' ?
         (props.textDirection === 'rtl' ? 'right' : 'ltr') : 'center'
@@ -79,7 +98,6 @@ const outlineColor = ref(
     props.outline === false || props.outlineColor === '' ?
         '1px solid transparent' : '1px solid ' + props.outlineColor
 )
-
 const borderSize = ref(
     props.borderSize === '' ? '1px' : props.borderSize
 )
@@ -91,38 +109,78 @@ const border = ref(
         (borderSize.value + ' ' + borderStyle.value + ' ' + props.borderColor) :
         props.border
 )
+const backgroundColor = ref(
+    props.disable ?
+        props.disableBackgroundColor : props.backgroundColor
+)
 
 const inputRef = ref(null)
 
-const noticeMounted = (name) => {
-  console.log(name + ' is mounted')
-}
-
 const checkState = () => {
-  const state = inputRef["value"]
-  if (state && !props.enable) {
-    state.disabled = true
+  const input = inputRef["value"]
+  if (input && props.disable) {
+    input.disabled = true
   }
 }
 
-const value = ref('')
-
-const saveValue = (v) => {
-  value.value = v
+const checkAutoFocus = () => {
+  const input = inputRef["value"]
+  if (input && !props.autoFocus) {
+  }
 }
+
+const handleInput = () => {
+  const inputValue = inputRef["value"]?.value;
+  if (props.consoleDebug) {
+    console.log(compAction('input', inputValue))
+  }
+  emit('update:modelValue', inputValue);
+}
+
+onBeforeMount(() => {
+  if (props.consoleDebug) {
+    debugNotice('before mount')
+  }
+})
 
 onMounted(() => {
   if (props.consoleDebug) {
-    noticeMounted('text-input')
+    debugNotice('mounted')
   }
   checkState()
+  checkAutoFocus()
 })
+
+onUnmounted(() => {
+  if (props.consoleDebug) {
+    debugNotice('unmounted')
+  }
+})
+
+const compName = 'text-input'
+
+const compAction = (action, value) => {
+  if (!action) action = ''
+  else action = ' @' + action
+  action = '[' + compName + action + ']'
+  if (value) action += ':' + value
+  return action
+}
+
+const debugNotice = (state) => {
+  console.log(compAction() + ' is ' + state)
+}
 </script>
 
 <template>
   <div class="text-input center--flex">
-    <input :placeholder="props.placeholder" ref="inputRef" :value="value" />
-<!--    <div>1234</div>-->
+    <input
+        :placeholder="props.placeholder"
+        ref="inputRef"
+        :value="modelValue"
+        @input="handleInput"
+        :autofocus="autoFocus ? autoFocus : undefined"
+    />
   </div>
 </template>
 
@@ -141,8 +199,6 @@ onMounted(() => {
 
   padding: 2px 8px;
   gap: 0.5rem;
-
-
 }
 
 .text-input input {
@@ -156,7 +212,6 @@ onMounted(() => {
   line-height: v-bind(lineHeight);
 
   color: v-bind(color);
-
 }
 
 .text-input:focus-within {

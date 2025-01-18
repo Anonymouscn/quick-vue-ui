@@ -42,6 +42,13 @@ const routes = [
                 Name: 'TextInput',
                 path: 'TextInput',
                 component: () => import(`../../packages/input/text-input/docs/README.md`),
+            },
+            // 表格组件
+            {
+                title: 'QTable',
+                Name: 'QTable',
+                path: 'QTable',
+                component: () => import(`../../packages/table/q-table/docs/README.md`),
             }
         ]
     },

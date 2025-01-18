@@ -10,5 +10,11 @@
     "compZhName": "文本输入框",
     "compDesc": "文本输入框",
     "compClassName": "text-input"
+  },
+  {
+    "compName": "QTable",
+    "compZhName": "表格",
+    "compDesc": "表格",
+    "compClassName": "q-table"
   }
 ]
